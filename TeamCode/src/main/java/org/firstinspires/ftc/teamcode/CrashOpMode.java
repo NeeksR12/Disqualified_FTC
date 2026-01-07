@@ -10,12 +10,12 @@ public abstract class CrashOpMode extends LinearOpMode {
 
     //Hardware
     protected CrashHardware crash = new CrashHardware();
-    
-    ElapsedTime runtime;
+    protected ElapsedTime runtime;
+
 
     // Main OpMode
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void runOpMode() {
 
         // Hardware initialization
         crash.init(hardwareMap);
@@ -24,13 +24,12 @@ public abstract class CrashOpMode extends LinearOpMode {
         generalSetup();
         specificSetup();
 
+        // Wait for start
         waitForStart();
         runtime.reset();
 
-        // Main loop
-        while (opModeIsActive()) {
-            mainLoop();
-        }
+        // Play
+        opMode();
 
     }
 
@@ -49,16 +48,15 @@ public abstract class CrashOpMode extends LinearOpMode {
     protected abstract void specificSetup();
 
     /**
-     * To contain anything that must loop and occur after pressing play in the OpMode, can be
-     * terminated for an autonomous OpMode using requestOpModeStop()
+     * To contain the code to execute after the "play" button is pressed
      */
-    protected abstract void mainLoop();
+    protected abstract void opMode();
 
     // Actual active methods
     /**
      * Description: This method contains all the statements that manually control the corehex and
      * the servo
-     * Pre-Condition: None
+     * Pre-Condition: All objects/hardware have been initialized
      * Post-Condition: The given command will execute the appropriate corehex or servo motion
      */
     protected void manualCoreHexAndServoControl() {
@@ -79,7 +77,7 @@ public abstract class CrashOpMode extends LinearOpMode {
     /**
      * Description: This method contains all the statements that control the flywheel, including
      * manual and automatic launches at set velocities
-     * Pre-Condition: None
+     * Pre-Condition: All objects/hardware have been initialized
      * Post-Condition: The given command will execute the appropriate flywheel and related hardware
      * as required
      */
@@ -112,7 +110,7 @@ public abstract class CrashOpMode extends LinearOpMode {
     /**
      * Description: Launches an artifact from the close location by running all pieces involved for
      * the duration the button is held
-     * Pre-Condition: None
+     * Pre-Condition: All objects/hardware have been initialized
      * Post-Condition: Robot runs all motors and hardware to launch from the close location
      */
     protected void bankShotAuto() {
@@ -130,7 +128,7 @@ public abstract class CrashOpMode extends LinearOpMode {
     /**
      * Description: Launches an artifact from the far location by running all pieces involved for
      * the duration the button is held
-     * Pre-Condition: None
+     * Pre-Condition: All objects/hardware have been initialized
      * Post-Condition: Robot runs all motors and hardware to launch from the far location
      */
     protected void farPowerAuto() {
@@ -146,7 +144,7 @@ public abstract class CrashOpMode extends LinearOpMode {
 
     /**
      * Description: Rotates the intake in or out
-     * Pre-Condition: None
+     * Pre-Condition: All objects/hardware have been initialized
      * Post-Condition: Intake is turned or not turned depending on buttons pressed or not pressed
      */
     protected void intakeArtifact() {
@@ -165,7 +163,7 @@ public abstract class CrashOpMode extends LinearOpMode {
 
     /**
      * Description: Turns robot at a specified degree value clockwise from where it is facing
-     * Pre-Condition: Param must be a double
+     * Pre-Condition: Param must be a double and all objects/hardware have been initialized
      * Post-Condition: Robot turns the specified degrees
      * @param degrees The angle the robot is turning
      */
@@ -189,7 +187,7 @@ public abstract class CrashOpMode extends LinearOpMode {
     /**
      * Description: Moves the robot a distance facing forward at an angle from where the robot is
      * facing
-     * Pre-Condition: Both params are doubles
+     * Pre-Condition: Both params are doubles and all objects/hardware have been initialized
      * Post-Condition: The robot moves the specified distance at the specified angle
      * @param distanceInches The distance in inches the robot moves
      * @param degrees The degree value of where the robot moves
@@ -226,6 +224,23 @@ public abstract class CrashOpMode extends LinearOpMode {
                 telemetry.addData("Current position", crash.drivetrain.rightFrontDrive.getCurrentPosition());
                 telemetry.update();
             }
+        }
+    }
+
+    /**
+     * Description: Sends a halt command to the drive train and ceases all robot function for the
+     * specified amount of time
+     * Pre-Condition: All objects/hardware have been initialized
+     * Post-Condition: The robot stays still doing nothing for the specified amount of time
+     * @param milliseconds The time in milliseconds for the robot to wait
+     */
+    protected void stay(int milliseconds) {
+        crash.currentTime = runtime.milliseconds();
+        while (runtime.milliseconds() <= (crash.currentTime + milliseconds)) {
+            crash.drivetrain.moveDrivetrain(0, 0, 0);
+            telemetry.addData("\"Current Time\"", crash.currentTime);
+            telemetry.addData("Runtime milliseconds", runtime.milliseconds());
+            telemetry.update();
         }
     }
 
