@@ -7,7 +7,7 @@ public class CrashAutoRBA extends CrashAuto{
 
     @Override
     protected void opMode() {
-        moveRobot(40, 180);
+        moveRobot(38, 180);
 
         stay(1000);
 

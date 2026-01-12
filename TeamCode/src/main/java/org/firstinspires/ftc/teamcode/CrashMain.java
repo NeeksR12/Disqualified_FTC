@@ -18,13 +18,25 @@ public class CrashMain extends CrashOpMode{
     @Override
     protected void opMode() {
         while (opModeIsActive()) {
-            crash.drivetrain.moveDrivetrain(-gamepad1.left_stick_y,
+
+            if (crash.drivingField)
+                crash.drivetrain.driveField(-gamepad1.left_stick_y,
                     gamepad1.left_stick_x, gamepad1.right_stick_x);
+            else
+                crash.drivetrain.moveDrivetrain(-gamepad1.left_stick_y,
+                        gamepad1.left_stick_x, gamepad1.right_stick_x);
+
+            driveControls();
+
             setFlywheelVelocity();
             manualCoreHexAndServoControl();
+
             intakeArtifact();
+
             telemetry.addData("Flywheel Velocity", ((DcMotorEx) crash.flywheel).getVelocity());
             telemetry.addData("Flywheel Power", crash.flywheel.getPower());
+            telemetry.addData("\nDrive state", crash.drivingField ? "Field Oriented" :
+                    "Robot Oriented");
             telemetry.update();
         }
     }

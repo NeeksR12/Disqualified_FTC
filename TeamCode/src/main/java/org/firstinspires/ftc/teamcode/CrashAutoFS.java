@@ -8,6 +8,10 @@ public class CrashAutoFS extends CrashAuto {
     @Override
     protected void opMode() {
 
+        moveRobot(4, 0);
+
+        stay(500);
+
         crash.currentTime = runtime.milliseconds();
 
         while (runtime.milliseconds() <= (crash.currentTime + 7000)) {
@@ -16,6 +20,7 @@ public class CrashAutoFS extends CrashAuto {
 
         stay(500);
 
-        moveRobot(15, 0);
+        moveRobot(11, 0);
+
     }
 }

@@ -137,7 +137,8 @@ public abstract class CrashOpMode extends LinearOpMode {
         if (((DcMotorEx) crash.flywheel).getVelocity() >= crash.farVelocity - 30) {
             crash.coreHex.setPower(1);
             crash.servo.setPower(-1);
-        } else {
+        }
+        else {
             crash.coreHex.setPower(-1);
         }
     }
@@ -242,6 +243,26 @@ public abstract class CrashOpMode extends LinearOpMode {
             telemetry.addData("Runtime milliseconds", runtime.milliseconds());
             telemetry.update();
         }
+    }
+
+    /**
+     * Description: Maintains the driving controls for crash, whether it is driving robot or field
+     * oriented and resetting robot yaw
+     * Pre-Condition: All objects/hardware ave been initialized
+     * Post-Condition: Robot drive state is updated as according to input
+     */
+    public void driveControls() {
+        if (gamepad1.dpad_up && !crash.lastUp) {
+            crash.drivingField = !crash.drivingField;
+            if (crash.drivingField)
+                crash.drivetrain.imu.resetYaw();
+        }
+        if (gamepad1.dpad_down && !crash.lastDown) {
+            crash.drivetrain.imu.resetYaw();
+        }
+
+        crash.lastUp = gamepad1.dpad_up;
+        crash.lastDown = gamepad1.dpad_down;
     }
 
 }

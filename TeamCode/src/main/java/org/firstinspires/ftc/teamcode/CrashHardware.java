@@ -12,7 +12,7 @@ public class CrashHardware {
 
     // Setting velocity targets (Ticks per second)
     public final int bankVelocity = 1450;
-    public final int farVelocity = 2050;
+    public final int farVelocity = 1950;
     public final int maxVelocity = 2200;
 
     // Encoder ratios (Constants)
@@ -25,11 +25,14 @@ public class CrashHardware {
     public final double INCHES_TO_ENCODER = INCHES_TO_MM / WHEEL_CIRCUMFERENCE *
             GEAR_RATIO * ENCODER_TO_MOTOR_REVOLUTION_RATIO;
 
-    // Time variable
+    // Variable fields
     public double currentTime = 0;
+    public boolean lastUp = false;
+    public boolean lastDown = false;
+    public boolean drivingField = false;
 
     // Drivetrain object
-    MecanumDrive drivetrain = new MecanumDrive();
+    public MecanumDrive drivetrain = new MecanumDrive();
 
     /**
      * Description: Initializes all hardware for Crash
