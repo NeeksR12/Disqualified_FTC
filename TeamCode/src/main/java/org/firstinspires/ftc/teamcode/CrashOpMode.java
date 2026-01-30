@@ -10,7 +10,7 @@ public abstract class CrashOpMode extends LinearOpMode {
 
     //Hardware
     protected CrashHardware crash = new CrashHardware();
-    protected ElapsedTime runtime;
+    protected ElapsedTime runtime, inertiaBuildUp;
 
 
     // Main OpMode
@@ -36,6 +36,8 @@ public abstract class CrashOpMode extends LinearOpMode {
     // Class method
     private void generalSetup() {
         runtime = new ElapsedTime();
+        inertiaBuildUp = new ElapsedTime();
+        crash.activeTime = new ElapsedTime();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
@@ -119,8 +121,9 @@ public abstract class CrashOpMode extends LinearOpMode {
         if (((DcMotorEx) crash.flywheel).getVelocity() >= crash.bankVelocity - 50) {
             crash.coreHex.setPower(1);
             crash.servo.setPower(-1);
+            inertiaBuildUp.reset();
         }
-        else {
+        else if (inertiaBuildUp.milliseconds() > 10) {
             crash.coreHex.setPower(-1);
         }
     }
@@ -137,8 +140,9 @@ public abstract class CrashOpMode extends LinearOpMode {
         if (((DcMotorEx) crash.flywheel).getVelocity() >= crash.farVelocity - 30) {
             crash.coreHex.setPower(1);
             crash.servo.setPower(-1);
+            inertiaBuildUp.reset();
         }
-        else {
+        else if (inertiaBuildUp.milliseconds() > 10) {
             crash.coreHex.setPower(-1);
         }
     }
@@ -197,11 +201,13 @@ public abstract class CrashOpMode extends LinearOpMode {
 
         degrees = AngleUnit.normalizeDegrees(degrees);
         double theta; // Angle in radians
+        double targetPosition;
 
+        // leftFrontDrive target
         if (0 <= degrees && degrees <= 90 || -180 <= degrees && degrees <= -90) {
             theta = Math.toRadians(degrees);
 
-            double targetPosition = ((distanceInches * (Math.cos(theta) * crash.INCHES_TO_ENCODER)
+            targetPosition = ((distanceInches * (Math.cos(theta) * crash.INCHES_TO_ENCODER)
                     + (distanceInches * Math.sin(theta)) * crash.INCHES_TO_ENCODER)) +
                     crash.drivetrain.leftFrontDrive.getCurrentPosition();
 
@@ -212,10 +218,12 @@ public abstract class CrashOpMode extends LinearOpMode {
                 telemetry.update();
             }
         }
+
+        // rightFrontDrive target
         else {
             theta = Math.toRadians(degrees);
 
-            double targetPosition = ((distanceInches * (Math.cos(theta) * crash.INCHES_TO_ENCODER)
+            targetPosition = ((distanceInches * (Math.cos(theta) * crash.INCHES_TO_ENCODER)
                     - (distanceInches * Math.sin(theta)) * crash.INCHES_TO_ENCODER)) +
                     crash.drivetrain.rightFrontDrive.getCurrentPosition();
 
@@ -236,11 +244,11 @@ public abstract class CrashOpMode extends LinearOpMode {
      * @param milliseconds The time in milliseconds for the robot to wait
      */
     protected void stay(int milliseconds) {
-        crash.currentTime = runtime.milliseconds();
-        while (runtime.milliseconds() <= (crash.currentTime + milliseconds)) {
+        crash.activeTime.reset();
+        while (crash.activeTime.milliseconds() < milliseconds) {
             crash.drivetrain.moveDrivetrain(0, 0, 0);
-            telemetry.addData("\"Current Time\"", crash.currentTime);
-            telemetry.addData("Runtime milliseconds", runtime.milliseconds());
+            telemetry.addData("Current Time", crash.activeTime.milliseconds());
+            telemetry.addData("Goal Time", milliseconds);
             telemetry.update();
         }
     }

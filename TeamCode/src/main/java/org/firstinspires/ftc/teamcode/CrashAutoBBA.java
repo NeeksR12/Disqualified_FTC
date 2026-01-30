@@ -11,9 +11,9 @@ public class CrashAutoBBA extends CrashAuto{
 
         stay(1000);
 
-        crash.currentTime = runtime.milliseconds();
+        crash.activeTime.reset();
 
-        while (runtime.milliseconds() <= (crash.currentTime + 7000)) {
+        while (crash.activeTime.milliseconds() <= 7000) {
             bankShotAuto();
         }
 

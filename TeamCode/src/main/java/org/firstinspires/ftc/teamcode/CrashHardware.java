@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class CrashHardware {
 
@@ -26,10 +27,12 @@ public class CrashHardware {
             GEAR_RATIO * ENCODER_TO_MOTOR_REVOLUTION_RATIO;
 
     // Variable fields
-    public double currentTime = 0;
     public boolean lastUp = false;
     public boolean lastDown = false;
     public boolean drivingField = false;
+
+    // Elapsed time for performing tasks
+    public ElapsedTime activeTime;
 
     // Drivetrain object
     public MecanumDrive drivetrain = new MecanumDrive();
