@@ -26,7 +26,6 @@ public class AprilTagWebcam {
     // Store references
     private Telemetry telemetry;
 
-    public double degreeCorrection;
 
     /**
      * Description: Initializes all of the required April Tag Processors and Vision Portal
@@ -89,7 +88,6 @@ public class AprilTagWebcam {
      */
     public void displayDetectionTelemetry(AprilTagDetection detectedId) {
         if (detectedId == null) {
-            degreeCorrection = 0;
             telemetry.addData("Tag", "Not detected");
             return;
         }
@@ -99,8 +97,6 @@ public class AprilTagWebcam {
             telemetry.addData("Range (in)", "%.1f", detectedId.ftcPose.range);
             telemetry.addData("Bearing (deg)", "%.1f", detectedId.ftcPose.bearing);
             telemetry.addData("Yaw (deg)", "%.1f", detectedId.ftcPose.yaw);
-
-            degreeCorrection = -detectedId.ftcPose.bearing;
         }
         else {
             telemetry.addLine(String.format("\n==== (ID %d) Unknown", detectedId.id));
