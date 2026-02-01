@@ -19,6 +19,10 @@ public class CrashMain extends CrashOpMode{
     protected void opMode() {
         while (opModeIsActive()) {
 
+            // Update april tag
+            crash.camera.update();
+
+            // Driving
             if (crash.drivingField)
                 crash.drivetrain.driveField(-gamepad1.left_stick_y,
                     gamepad1.left_stick_x, gamepad1.right_stick_x);
@@ -26,13 +30,17 @@ public class CrashMain extends CrashOpMode{
                 crash.drivetrain.moveDrivetrain(-gamepad1.left_stick_y,
                         gamepad1.left_stick_x, gamepad1.right_stick_x);
 
+            // Field or Robot
             driveControls();
 
+            // Other hardware
             setFlywheelVelocity();
             manualCoreHexAndServoControl();
 
+            // Intake
             intakeArtifact();
 
+            // Telemetry
             telemetry.addData("Flywheel Velocity", ((DcMotorEx) crash.flywheel).getVelocity());
             telemetry.addData("Flywheel Power", crash.flywheel.getPower());
             telemetry.addData("\nDrive state", crash.drivingField ? "Field Oriented" :

@@ -18,7 +18,7 @@ public abstract class CrashOpMode extends LinearOpMode {
     public void runOpMode() {
 
         // Hardware initialization
-        crash.init(hardwareMap);
+        crash.init(hardwareMap, telemetry);
 
         // Init phase
         generalSetup();
@@ -29,7 +29,7 @@ public abstract class CrashOpMode extends LinearOpMode {
         runtime.reset();
 
         // Play
-        opMode();
+        opMode ();
 
     }
 
@@ -38,6 +38,33 @@ public abstract class CrashOpMode extends LinearOpMode {
         runtime = new ElapsedTime();
         inertiaBuildUp = new ElapsedTime();
         crash.activeTime = new ElapsedTime();
+
+        // Alliance selection
+        while (opModeInInit()) {
+
+            if (gamepad1.x) {
+                crash.activeTag = crash.BLUE_TAG_ID;
+            }
+            if (gamepad1.b) {
+                crash.activeTag = crash.RED_TAG_ID;
+            }
+
+            telemetry.addLine("=== APRILTAG SELECTION ===");
+            telemetry.addLine("Press BEFORE Start");
+            telemetry.addLine("X = BLUE (ID 20)");
+            telemetry.addLine("B = RED  (ID 24)");
+            telemetry.addLine("------------------------");
+            telemetry.addData("SELECTED TAG ID", crash.activeTag);
+
+            if (crash.activeTag == crash.BLUE_TAG_ID) {
+                telemetry.addLine("SELECTED COLOR: BLUE");
+            } else {
+                telemetry.addLine("SELECTED COLOR: RED");
+            }
+
+            telemetry.update();
+        }
+
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
@@ -89,9 +116,19 @@ public abstract class CrashOpMode extends LinearOpMode {
         }
         else if (gamepad1.left_bumper) {
             farPowerAuto();
+
+            if (gamepad1.leftBumperWasPressed()) {
+                alignToTag(crash.activeTag);
+            }
+
         }
         else if (gamepad1.right_bumper) {
             bankShotAuto();
+
+            if (gamepad1.rightBumperWasPressed()) {
+                alignToTag(crash.activeTag);
+            }
+
         }
         else if (gamepad1.b) {
             ((DcMotorEx) crash.flywheel).setVelocity(crash.bankVelocity);
@@ -178,7 +215,7 @@ public abstract class CrashOpMode extends LinearOpMode {
         double targetPosition = (degrees * crash.DRIVE_ENCODER_DEGREE_RATIO) +
                 crash.drivetrain.leftFrontDrive.getCurrentPosition();
 
-
+        // Turning
         while (Math.abs(crash.drivetrain.leftFrontDrive.getCurrentPosition() - targetPosition) > 10) {
             crash.drivetrain.moveDrivetrain(0, 0, 0.5 *
                     (degrees/Math.abs(degrees)));
@@ -256,7 +293,7 @@ public abstract class CrashOpMode extends LinearOpMode {
     /**
      * Description: Maintains the driving controls for crash, whether it is driving robot or field
      * oriented and resetting robot yaw
-     * Pre-Condition: All objects/hardware ave been initialized
+     * Pre-Condition: All objects/hardware have been initialized
      * Post-Condition: Robot drive state is updated as according to input
      */
     public void driveControls() {
@@ -271,6 +308,16 @@ public abstract class CrashOpMode extends LinearOpMode {
 
         crash.lastUp = gamepad1.dpad_up;
         crash.lastDown = gamepad1.dpad_down;
+    }
+
+    /**
+     * Description: Aligns the robot to a specific tag at the specified angle
+     * Pre-Condition: All objects/hardware have been initialized
+     * Post-Condition: Robot aligns itself at the specified angle from the tag
+     * @param tagId The integer value associated with the desired tag
+     */
+    public void alignToTag(int tagId) {
+        turnRobot(-crash.camera.getBearingFromId(tagId));
     }
 
 }

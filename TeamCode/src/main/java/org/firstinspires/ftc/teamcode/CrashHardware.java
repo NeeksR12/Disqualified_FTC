@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 public class CrashHardware {
 
     //Declarations of hardware
@@ -26,6 +28,12 @@ public class CrashHardware {
     public final double INCHES_TO_ENCODER = INCHES_TO_MM / WHEEL_CIRCUMFERENCE *
             GEAR_RATIO * ENCODER_TO_MOTOR_REVOLUTION_RATIO;
 
+    // April tags
+    public final int BLUE_TAG_ID = 20;
+    public final int RED_TAG_ID = 24;
+    public int activeTag = 20;
+
+
     // Variable fields
     public boolean lastUp = false;
     public boolean lastDown = false;
@@ -37,15 +45,21 @@ public class CrashHardware {
     // Drivetrain object
     public MecanumDrive drivetrain = new MecanumDrive();
 
+    // Camera Object
+    public AprilTagWebcam camera = new AprilTagWebcam();
+
     /**
      * Description: Initializes all hardware for Crash
-     * Pre-Condition: Must be given a hardware map with the correct names
+     * Pre-Condition: Must be given a hardware map with the correct names and a telemetry object
      * Post-Condition: The software variables are linked up to the correct hardware components
      * @param hwMap The hardware map
      */
-    public void init(HardwareMap hwMap) {
+    public void init(HardwareMap hwMap, Telemetry tel) {
         // Initializing drivetrain
         drivetrain.init(hwMap);
+
+        // Initializing camera
+        camera.init(hwMap, tel);
 
         // Hardware
         flywheel = hwMap.get(DcMotor.class, "flywheel");
