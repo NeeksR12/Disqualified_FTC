@@ -21,58 +21,38 @@ public abstract class CrashOpMode extends LinearOpMode {
         crash.init(hardwareMap, telemetry);
 
         // Init phase
-        generalSetup();
-        specificSetup();
+        setup();
 
         // Wait for start
         waitForStart();
         runtime.reset();
 
         // Play
-        opMode ();
+        opMode();
 
     }
 
     // Class method
-    private void generalSetup() {
+    /**
+     * Description: Performs all setup and actions required in the init phase of the OpMode
+     * Pre-Condition: All objects/hardware is declared and initialized
+     * Post-Condition: The OpMode's init phase is performed
+     */
+    private void setup() {
         runtime = new ElapsedTime();
         inertiaBuildUp = new ElapsedTime();
         crash.activeTime = new ElapsedTime();
 
-        // Alliance selection
-        while (opModeInInit()) {
+        // Pre-Aliance selection setup
+        specificSetup();
 
-            if (gamepad1.x) {
-                crash.activeTag = crash.BLUE_TAG_ID;
-            }
-            if (gamepad1.b) {
-                crash.activeTag = crash.RED_TAG_ID;
-            }
 
-            telemetry.addLine("=== APRILTAG SELECTION ===");
-            telemetry.addLine("Press BEFORE Start");
-            telemetry.addLine("X = BLUE (ID 20)");
-            telemetry.addLine("B = RED  (ID 24)");
-            telemetry.addLine("------------------------");
-            telemetry.addData("SELECTED TAG ID", crash.activeTag);
-
-            if (crash.activeTag == crash.BLUE_TAG_ID) {
-                telemetry.addLine("SELECTED COLOR: BLUE");
-            } else {
-                telemetry.addLine("SELECTED COLOR: RED");
-            }
-
-            telemetry.update();
-        }
-
-        telemetry.addData("Status", "Initialized");
-        telemetry.update();
     }
 
     // Abstract Methods
     /**
      * To contain anything that must occur specifically in the initialization phase of the specific
-     * OpMode
+     * OpMode before alliance selection
      */
     protected abstract void specificSetup();
 
@@ -118,7 +98,8 @@ public abstract class CrashOpMode extends LinearOpMode {
             farPowerAuto();
 
             if (gamepad1.leftBumperWasPressed()) {
-                alignToTag(crash.activeTag);
+                alignToTag(crash.activeTag, (crash.activeTag - 22) * crash.alignmentCorrection
+                        * crash.camera.isTagDetected(crash.activeTag));
             }
 
         }
@@ -126,7 +107,7 @@ public abstract class CrashOpMode extends LinearOpMode {
             bankShotAuto();
 
             if (gamepad1.rightBumperWasPressed()) {
-                alignToTag(crash.activeTag);
+                alignToTag(crash.activeTag, 0);
             }
 
         }
@@ -158,11 +139,15 @@ public abstract class CrashOpMode extends LinearOpMode {
         if (((DcMotorEx) crash.flywheel).getVelocity() >= crash.bankVelocity - 50) {
             crash.coreHex.setPower(1);
             crash.servo.setPower(-1);
-            inertiaBuildUp.reset();
+            //inertiaBuildUp.reset();
         }
-        else if (inertiaBuildUp.milliseconds() > 10) {
+        /*
+        else if (inertiaBuildUp.milliseconds() > 1000) {
             crash.coreHex.setPower(-1);
         }
+         */
+        else
+            crash.coreHex.setPower(-1);
     }
 
     /**
@@ -179,7 +164,7 @@ public abstract class CrashOpMode extends LinearOpMode {
             crash.servo.setPower(-1);
             inertiaBuildUp.reset();
         }
-        else if (inertiaBuildUp.milliseconds() > 10) {
+        else if (inertiaBuildUp.milliseconds() > 1000) {
             crash.coreHex.setPower(-1);
         }
     }
@@ -208,8 +193,14 @@ public abstract class CrashOpMode extends LinearOpMode {
      * Pre-Condition: Param must be a double and all objects/hardware have been initialized
      * Post-Condition: Robot turns the specified degrees
      * @param degrees The angle the robot is turning
+     * @param power The power for wheels (0 < power <= 1)
      */
-    protected void turnRobot(double degrees) {
+    protected void turnRobot(double degrees, double power) {
+
+        // Checking power
+        if (power > 1) {
+            power = 0.4;
+        }
 
         //Variable
         double targetPosition = (degrees * crash.DRIVE_ENCODER_DEGREE_RATIO) +
@@ -217,7 +208,7 @@ public abstract class CrashOpMode extends LinearOpMode {
 
         // Turning
         while (Math.abs(crash.drivetrain.leftFrontDrive.getCurrentPosition() - targetPosition) > 10) {
-            crash.drivetrain.moveDrivetrain(0, 0, 0.5 *
+            crash.drivetrain.moveDrivetrain(0, 0, power *
                     (degrees/Math.abs(degrees)));
             telemetry.addData("Target position", targetPosition);
             telemetry.addData("Current position",
@@ -315,9 +306,51 @@ public abstract class CrashOpMode extends LinearOpMode {
      * Pre-Condition: All objects/hardware have been initialized
      * Post-Condition: Robot aligns itself at the specified angle from the tag
      * @param tagId The integer value associated with the desired tag
+     * @param degrees The additional degree value wanted
      */
-    public void alignToTag(int tagId) {
-        turnRobot(-crash.camera.getBearingFromId(tagId));
+    public void alignToTag(int tagId, double degrees) {
+        turnRobot(-crash.camera.getBearingFromId(tagId) + degrees, 0.1);
+    }
+
+    /**
+     * Description: Allows for a user to select the alliance of the robot during INIT
+     * Pre-Condition: All objects and hardware must be initialized
+     * Post-Condition: Alliance selection choice is recorded to the active tag
+     */
+    public void selectAliance() {
+        while (opModeInInit()) {
+
+            // Tag selection
+            if (gamepad1.x) {
+                crash.activeTag = crash.BLUE_TAG_ID;
+            }
+            if (gamepad1.b) {
+                crash.activeTag = crash.RED_TAG_ID;
+            }
+
+            // Telemetry
+            telemetry.addLine("=== APRILTAG SELECTION ===");
+            telemetry.addLine("Press BEFORE Start");
+            telemetry.addLine("X = BLUE (ID 20)");
+            telemetry.addLine("B = RED  (ID 24)");
+            telemetry.addLine("------------------------");
+            telemetry.addData("SELECTED TAG ID", crash.activeTag);
+
+            if (crash.activeTag == crash.BLUE_TAG_ID) {
+                telemetry.addLine("SELECTED COLOR: BLUE");
+            } else {
+                telemetry.addLine("SELECTED COLOR: RED");
+            }
+
+            telemetry.update();
+
+            // Blackboard
+            blackboard.put("Alliance tag ID", crash.activeTag);
+
+        }
+
+        telemetry.addData("Status", "Initialized");
+        telemetry.update();
     }
 
 }

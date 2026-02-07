@@ -117,36 +117,61 @@ public class AprilTagWebcam {
     }
 
     /**
-     * Description: Returns the distance from a detected tag
+     * Description: Returns the distance from a detected tag (-1 if not found)
      * Pre-Condition: All hardware and objects are declared and initialized
-     * Post-Condition: Distance is returned in inches
+     * Post-Condition: Distance is returned in inches (-1 if not found)
      * @param tagId The ID being detected
      * @return The distance in inches
      */
     public double getDistanceFromId(int tagId) {
-        return getTagBySpecificId(tagId).ftcPose.range;
+        if (getTagBySpecificId(tagId) == null)
+            return -1;
+        else
+            return getTagBySpecificId(tagId).ftcPose.range;
     }
 
     /**
-     * Description: Returns the distance from a detected tag
+     * Description: Returns the distance from a detected tag (0 if not found)
      * Pre-Condition: All hardware and objects are declared and initialized
-     * Post-Condition: Distance is returned in inches
+     * Post-Condition: Distance is returned in inches (0 if not found)
      * @param tagId The ID being detected
      * @return The bearing in degrees
      */
     public double getBearingFromId(int tagId) {
-        return getTagBySpecificId(tagId).ftcPose.bearing;
+        if (getTagBySpecificId(tagId) == null)
+            return 0;
+        else
+            return getTagBySpecificId(tagId).ftcPose.bearing;
     }
 
     /**
-     * Description: Returns the distance from a detected tag
+     * Description: Returns the distance from a detected tag (0 if not found)
      * Pre-Condition: All hardware and objects are declared and initialized
-     * Post-Condition: Distance is returned in inches
+     * Post-Condition: Distance is returned in inches (0 if not found)
      * @param tagId The ID being detected
      * @return The yaw in degrees
      */
     public double getYawFromId(int tagId) {
-        return getTagBySpecificId(tagId).ftcPose.yaw;
+        if (getTagBySpecificId(tagId) == null)
+            return 0;
+        else
+            return getTagBySpecificId(tagId).ftcPose.yaw;
+    }
+
+    /**
+     * Description: Checks if a tag is detected and returns a multiplier of 1 (yes) or 0 (no)
+     * Pre-Condition: All objects and hardware are initialized
+     * Post-Condition: 1 (yes) or 0 (no) is returned
+     * @param tagId The tag being checked
+     * @return The result (1 yes, 0 no)
+     */
+    public int isTagDetected(int tagId) {
+        for (AprilTagDetection detection : aprilTagDetection) {
+            if (detection.id == tagId) {
+                return 1;
+            }
+        }
+        return 0;
     }
 
 }

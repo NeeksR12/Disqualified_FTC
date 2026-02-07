@@ -14,7 +14,7 @@ public class CrashHardware {
     public CRServo servo;
 
     // Setting velocity targets (Ticks per second)
-    public final int bankVelocity = 1450;
+    public final int bankVelocity = 1550;
     public final int farVelocity = 1950;
     public final int maxVelocity = 2200;
 
@@ -27,6 +27,9 @@ public class CrashHardware {
     public final double ENCODER_TO_MOTOR_REVOLUTION_RATIO = 28;
     public final double INCHES_TO_ENCODER = INCHES_TO_MM / WHEEL_CIRCUMFERENCE *
             GEAR_RATIO * ENCODER_TO_MOTOR_REVOLUTION_RATIO;
+
+    // Alignment correction multiplier (Half of the desired degrees to rotate)
+    public final double alignmentCorrection = 4;
 
     // April tags
     public final int BLUE_TAG_ID = 20;

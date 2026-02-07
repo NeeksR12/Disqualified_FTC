@@ -6,9 +6,36 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 @TeleOp(name = "CrashMain")
 public class CrashMain extends CrashOpMode{
 
-    // Setup
+    /**
+     * Description: Takes the stored alliance tag value from auto, if not allows for selection
+     * Pre-Condition: All objects/hardware used are initialized
+     * Post-Condition: Alliance is chosen for main
+     */
     @Override
-    protected final void specificSetup() {}
+    protected final void specificSetup() {
+
+        // Retrieving the stored alliance
+        java.lang.Object temp = blackboard.get("Alliance tag ID");
+
+        // Setting the stored alliance
+        if (temp instanceof Integer) {
+            crash.activeTag = (Integer) temp; // Alliance from auto
+
+            // Telemetry
+            if (crash.activeTag == crash.BLUE_TAG_ID) {
+                telemetry.addLine("SELECTED COLOR: BLUE");
+            }
+            else {
+                telemetry.addLine("SELECTED COLOR: RED");
+            }
+
+            telemetry.addData("Status", "Initialized");
+            telemetry.update();
+        }
+        else
+            selectAliance();
+
+    }
 
     /**
      * Description: Calls all methods needed to operate Crash in TeleOp
